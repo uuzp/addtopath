@@ -44,25 +44,20 @@ jobs:
         run: Compress-Archive -Path ${{ steps.prep.outputs.ARTIFACT_PATH }} -DestinationPath ${{ steps.prep.outputs.ZIP_PATH }}
         shell: pwsh
 
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        # This action handles creating or updating a release for the tag
+        # and uploads assets specified in the 'files' parameter.
         with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref_name }}
+          # The GITHUB_TOKEN is automatically used by this action
+          # tag_name: ${{ github.ref }} # Uses the tag that triggered the workflow by default
+          name: Release ${{ github.ref_name }} # Name of the release
           body: |
             Automated release for ${{ github.ref_name }}
-          draft: false
-          prerelease: false
-
-      - name: Upload Release Asset
-        uses: actions/upload-release-asset@v1
+            Contains the Windows executable.
+          files: |
+            ${{ steps.prep.outputs.ZIP_PATH }}
+          # draft: false # Default is false
+          # prerelease: false # Default is false
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above
-          asset_path: ${{ steps.prep.outputs.ZIP_PATH }}
-          asset_name: ${{ steps.prep.outputs.ARTIFACT_NAME }}.zip
-          asset_content_type: application/zip
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Explicitly pass the token for clarity and compatibility

@@ -33,13 +33,15 @@ jobs:
         id: prep
         run: |
           $ARTIFACT_NAME="addtopath-windows-${{ github.ref_name }}"
-          echo "ARTIFACT_NAME=$ARTIFACT_NAME" >> $env:GITHUB_ENV
-          echo "ARTIFACT_PATH=./target/x86_64-pc-windows-msvc/release/addtopath.exe" >> $env:GITHUB_ENV
-          echo "ZIP_PATH=./${ARTIFACT_NAME}.zip" >> $env:GITHUB_ENV
+          $ARTIFACT_PATH="./target/x86_64-pc-windows-msvc/release/addtopath.exe"
+          $ZIP_PATH="./${ARTIFACT_NAME}.zip"
+          echo "ARTIFACT_NAME=$ARTIFACT_NAME" >> $env:GITHUB_OUTPUT
+          echo "ARTIFACT_PATH=$ARTIFACT_PATH" >> $env:GITHUB_OUTPUT
+          echo "ZIP_PATH=$ZIP_PATH" >> $env:GITHUB_OUTPUT
         shell: pwsh # Use PowerShell on Windows runner
 
       - name: Package executable
-        run: Compress-Archive -Path ${{ env.ARTIFACT_PATH }} -DestinationPath ${{ env.ZIP_PATH }}
+        run: Compress-Archive -Path ${{ steps.prep.outputs.ARTIFACT_PATH }} -DestinationPath ${{ steps.prep.outputs.ZIP_PATH }}
         shell: pwsh
 
       - name: Create Release
@@ -61,6 +63,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above
-          asset_path: ${{ env.ZIP_PATH }}
-          asset_name: ${{ env.ARTIFACT_NAME }}.zip
+          asset_path: ${{ steps.prep.outputs.ZIP_PATH }}
+          asset_name: ${{ steps.prep.outputs.ARTIFACT_NAME }}.zip
           asset_content_type: application/zip

@@ -2,14 +2,12 @@
 name = "addtopath"
 version = "0.1.0"
 edition = "2024"
-# Removed build = "build.rs" for now
 
 [dependencies]
-winreg = "0.52" # 用于操作 Windows 注册表
+winreg = "0.52"
 
 [target.'cfg(windows)'.dependencies]
 is_elevated = "0.1" # Check if running as administrator
-# windows-sys 用于发送系统消息和执行 Shell 操作
 windows-sys = { version = "0.52", features = [
     "Win32_Foundation",
     "Win32_UI_WindowsAndMessaging",
@@ -21,14 +19,9 @@ windows-sys = { version = "0.52", features = [
     "Win32_System_Registry", # Added: Required by SHELLEXECUTEINFOW
 ]}
 
-# Build dependencies
-[build-dependencies]
-embed-resource = "2.4" # To embed manifest if we choose that route later, or for icons
-
-# Release profile settings for smaller binary size
 [profile.release]
-opt-level = "z"  # Optimize for size
+opt-level = "z"
 lto = true
 codegen-units = 1
 panic = "abort"
-strip = true     # Automatically strip symbols in release builds
+strip = true
